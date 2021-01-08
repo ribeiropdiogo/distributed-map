@@ -3,12 +3,14 @@ package distributedmap.benchmark;
 import distributedmap.impl.DistributedMap;
 
 import java.io.IOException;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 public class Benchmark {
-    public static void main(String[] args) throws IOException, ExecutionException {
+
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
 
         Options options = Options.parse(args);
         if (options == null) return;
@@ -27,26 +29,34 @@ public class Benchmark {
             int option = random.nextInt(2) + 1;
             switch (option){
                 case 1:
-                    //dm.put();
+                    int key = random.nextInt(10000) + 1;
+                    byte[] array = "This benchmark is really fancy...".getBytes();
+                    Map<Long, byte[]> values = new HashMap<>();
+                    values.put(Integer.toUnsignedLong(key),array);
+                    dm.put(values);
                     break;
                 case 2:
-                    //dm.get();
+                    int get_key = random.nextInt(10000) + 1;
+                    Collection<Long> l = new ArrayList<>();
+                    l.add(Integer.toUnsignedLong(get_key));
+                    dm.get(l);
                     break;
             }
 
             long current = System.currentTimeMillis();
-            trtt += (current - start)/60F;
-            elapsed = (current - start)/60F;
+            trtt += TimeUnit.MILLISECONDS.toMinutes(current - start);
+            elapsed = TimeUnit.MILLISECONDS.toMinutes(current - start);
             operations++;
+            Thread.sleep(10);
         }
 
         if (operations > 0) {
             // Print Results
             System.out.println("> Benchmark results after "+options.execution_time+" minutes : ");
             throughput = operations/elapsed;
-            System.out.println("Throughput: " + throughput + "operations/second");
+            System.out.println("    Throughput: " + throughput + " operations/second");
             artt = trtt/operations;
-            System.out.println("Average Response Time: " + artt + "seconds");
+            System.out.println("    Average Response Time: " + artt + " seconds");
         } else {
             System.out.println("> Error running benchmark");
         }

@@ -9,7 +9,7 @@ public class Options {
     @Parameter(names = {"-h", "-?", "--help"}, help = true, description = "display usage information")
     public boolean help = false;
 
-    @Parameter(names = {"-t", "--time"}, required = true, description = "execution time in minutes")
+    @Parameter(names = {"-t", "--time"}, required = false, description = "execution time in minutes")
     public long execution_time = 2;
 
 
