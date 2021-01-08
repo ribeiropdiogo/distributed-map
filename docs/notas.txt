@@ -1,0 +1,8 @@
+- 1 key-value apenas esta num server
+- avaliação de performance -> fazer um benchmark
+- valorizações n temos que fazer todas, mas pelo menos 3 em 4 
+
+Para correr isto:
+	- Correr os servers (4) com a fala -n 0, -n 1, -n 2 e -n 3
+	- numeração começa no 0
+	- o ficheiro de teste mostra a invocação 

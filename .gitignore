@@ -1,0 +1,7 @@
+# IntelliJ Stuff
+.idea/
+target/
+*.iml
+
+# MacOS Trash
+*.DS_Store
