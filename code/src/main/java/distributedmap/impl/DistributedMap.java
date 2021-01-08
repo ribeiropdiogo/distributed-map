@@ -1,12 +1,12 @@
-package parallel_hashmap.impl;
+package distributedmap.impl;
 
-import static parallel_hashmap.Constants.*;
-import parallel_hashmap.comm.FutureSocketChannelReader;
-import parallel_hashmap.comm.FutureSocketChannelWriter;
-import parallel_hashmap.comm.Request;
-import parallel_hashmap.comm.Response;
-import parallel_hashmap.util.Counter;
-import parallel_hashmap.util.LockableHashMap;
+import static distributedmap.Constants.*;
+import distributedmap.comm.FutureSocketChannelReader;
+import distributedmap.comm.FutureSocketChannelWriter;
+import distributedmap.comm.Request;
+import distributedmap.comm.Response;
+import distributedmap.util.Counter;
+import distributedmap.util.LockableHashMap;
 import spullara.nio.channels.FutureSocketChannel;
 import java.io.IOException;
 import java.net.InetSocketAddress;

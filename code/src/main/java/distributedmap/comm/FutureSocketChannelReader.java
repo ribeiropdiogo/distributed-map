@@ -1,9 +1,8 @@
-package parallel_hashmap.comm;
+package distributedmap.comm;
 
 import spullara.nio.channels.FutureSocketChannel;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.io.ObjectInputStream;
 import java.net.SocketException;
 import java.nio.ByteBuffer;

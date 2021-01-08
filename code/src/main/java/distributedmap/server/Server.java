@@ -1,8 +1,8 @@
-package parallel_hashmap.server;
+package distributedmap.server;
 
-import static parallel_hashmap.Constants.*;
-import parallel_hashmap.comm.*;
-import parallel_hashmap.util.LockableHashMap;
+import static distributedmap.Constants.*;
+import distributedmap.comm.*;
+import distributedmap.util.LockableHashMap;
 import spullara.nio.channels.FutureServerSocketChannel;
 import java.io.IOException;
 import java.net.InetSocketAddress;

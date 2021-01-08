@@ -1,4 +1,4 @@
-package parallel_hashmap.comm;
+package distributedmap.comm;
 
 
 public interface Message {

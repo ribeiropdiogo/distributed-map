@@ -1,4 +1,4 @@
-package parallel_hashmap.comm;
+package distributedmap.comm;
 
 import spullara.nio.channels.FutureSocketChannel;
 import java.io.ByteArrayOutputStream;

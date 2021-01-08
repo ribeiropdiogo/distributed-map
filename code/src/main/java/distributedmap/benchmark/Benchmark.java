@@ -1,7 +1,6 @@
-package parallel_hashmap.benchmark;
+package distributedmap.benchmark;
 
-import parallel_hashmap.impl.DistributedMap;
-import parallel_hashmap.benchmark.Options;
+import distributedmap.impl.DistributedMap;
 
 import java.io.IOException;
 import java.util.Random;

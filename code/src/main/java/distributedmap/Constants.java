@@ -1,4 +1,4 @@
-package parallel_hashmap;
+package distributedmap;
 
 
 public final class Constants {

@@ -1,4 +1,4 @@
-package parallel_hashmap.comm;
+package distributedmap.comm;
 
 import java.io.Serializable;
 import java.util.Collection;

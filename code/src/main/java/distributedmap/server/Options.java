@@ -1,16 +1,17 @@
-package parallel_hashmap.benchmark;
+package distributedmap.server;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+
 
 public class Options {
 
     @Parameter(names = {"-h", "-?", "--help"}, help = true, description = "display usage information")
     public boolean help = false;
 
-    @Parameter(names = {"-t", "--time"}, required = true, description = "execution time in minutes")
-    public long execution_time = 2;
+    @Parameter(names = {"-n", "--number"}, required = true, description = "number of the server (>= 0)")
+    public int number;
 
 
     public static Options parse(String[] args) {
@@ -21,7 +22,7 @@ public class Options {
                 .addObject(options)
                 .build();
 
-        parser.setProgramName(Benchmark.class.getSimpleName());
+        parser.setProgramName(Server.class.getSimpleName());
 
         try {
             parser.parse(args);
@@ -31,7 +32,7 @@ public class Options {
             return null;
         }
 
-        if (options.help || options.execution_time < 0) {
+        if (options.help || options.number < 0) {
             parser.usage();
             return null;
         }

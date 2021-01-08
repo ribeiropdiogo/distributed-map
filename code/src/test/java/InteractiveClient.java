@@ -1,5 +1,5 @@
 import static java.lang.System.out;
-import parallel_hashmap.impl.DistributedMap;
+import distributedmap.impl.DistributedMap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

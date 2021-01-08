@@ -1,4 +1,4 @@
-package parallel_hashmap.util;
+package distributedmap.util;
 
 
 public class Counter {

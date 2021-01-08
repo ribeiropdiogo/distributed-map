@@ -1,4 +1,4 @@
-import parallel_hashmap.impl.DistributedMap;
+import distributedmap.impl.DistributedMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

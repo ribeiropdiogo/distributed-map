@@ -1,4 +1,4 @@
-package parallel_hashmap.util;
+package distributedmap.util;
 
 import java.util.Map;
 import java.util.HashMap;

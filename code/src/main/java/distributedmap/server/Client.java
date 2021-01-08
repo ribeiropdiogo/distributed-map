@@ -1,4 +1,4 @@
-package parallel_hashmap.server;
+package distributedmap.server;
 
 import spullara.nio.channels.FutureSocketChannel;
 
