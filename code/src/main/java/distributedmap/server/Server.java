@@ -9,11 +9,9 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
 import static java.util.concurrent.Executors.defaultThreadFactory;
+
+import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class Server {
@@ -21,6 +19,8 @@ public class Server {
     private static FutureServerSocketChannel fssc;
     private static ArrayList<Client> clients;
     private static LockableHashMap<Long, byte[]> map;
+    private static int requests_served;
+    private static Options options;
 
 
     /* Impede a instanciação */
@@ -37,6 +37,7 @@ public class Server {
 
         FutureSocketChannelWriter.write(c.socket, res)
                 .thenAccept(_void_ -> {
+                    requests_served++;
                     serveRec(c);
                 });
     }
@@ -61,6 +62,7 @@ public class Server {
 
         FutureSocketChannelWriter.write(c.socket, res)
                 .thenAccept(_void_ -> {
+                    requests_served++;
                     serveRec(c);
                 });
     }
@@ -71,12 +73,14 @@ public class Server {
         FutureSocketChannelReader.read(c.socket, buf).thenAccept(msg -> {
             Request req = (Request) msg;
 
+            //System.out.println("> " + Arrays.toString(req.vectorClock));
+            // Wait for turn
+            while(req.vectorClock[options.number] > (requests_served+1)){}
+
             if (req.method == Request.Method.PUT) {
                 putRec(c, req.map);
-
             } else if (req.method == Request.Method.GET) {
                 getRec(c, req.col);
-
             } else {
                 System.out.println("> Invalid message");
                 clients.remove(c);
@@ -103,7 +107,7 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        Options options = Options.parse(args);
+        options = Options.parse(args);
         if (options == null) return;
 
         System.out.println("> Server '" + options.number + "' started...");
@@ -112,6 +116,7 @@ public class Server {
 
         clients = new ArrayList<>();
         map = new LockableHashMap<>();
+        requests_served = 0;
 
         AsynchronousChannelGroup acg =
                 AsynchronousChannelGroup.withFixedThreadPool(1, defaultThreadFactory());

@@ -41,7 +41,7 @@ public class InteractiveClient {
         map.close();
     }
 
-    private void start() throws IOException {
+    private void start() throws IOException, ExecutionException, InterruptedException {
         out.println("> Ready!");
         while (true) {
             String line = reader.readLine();
@@ -72,7 +72,7 @@ public class InteractiveClient {
         }
     }
 
-    private void put() throws IOException {
+    private void put() throws IOException, ExecutionException, InterruptedException {
         Map<Long, byte[]> req = new HashMap<>();
 
         lock.lock();
@@ -102,7 +102,7 @@ public class InteractiveClient {
         });
     }
 
-    private void get(String line) {
+    private void get(String line) throws ExecutionException, InterruptedException {
         String[] _keys = line.substring(4).strip().split(" +");
 
         Collection<Long> req = new ArrayList<>();
@@ -121,7 +121,7 @@ public class InteractiveClient {
         });
     }
 
-    public static void main(String[] args) throws IOException, ExecutionException {
+    public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
         InteractiveClient cli = null;
 
         try {
