@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 
 public class Test {
@@ -13,9 +14,10 @@ public class Test {
 
         byte[] array = "wassaaaa".getBytes();
 
-        /*
+
         values.put(Integer.toUnsignedLong(1),array);
         values.put(Integer.toUnsignedLong(2),array);
+        /*
         values.put(Integer.toUnsignedLong(3),array);
         values.put(Integer.toUnsignedLong(4),array);
         values.put(Integer.toUnsignedLong(5),array);
@@ -43,21 +45,29 @@ public class Test {
         Collection<Long> l = new ArrayList<>();
         l.add(Integer.toUnsignedLong(1));
 
+
         dm.put(values).thenAccept(v -> {
             System.out.println("sent...");
-            dm.get(l).thenAccept(map -> {
-                System.out.println("received...");
-                for (Map.Entry<Long, byte[]> entry : map.entrySet()) {
-                    System.out.println(entry.getKey().toString() + " = " + new String(entry.getValue()));
-                }
+            try {
+                dm.get(l).thenAccept(map -> {
+                    System.out.println("received...");
+                    for (Map.Entry<Long, byte[]> entry : map.entrySet()) {
+                        System.out.println(entry.getKey().toString() + " = " + new String(entry.getValue()));
+                    }
 
-                dm.close();
-                System.out.println("closed...");
-            });
+                    dm.close();
+                    System.out.println("closed...");
+                });
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         });
 
         while (true) {
             try { Thread.sleep(Long.MAX_VALUE); } catch (Exception ignored) {}
         }
+
     }
 }
