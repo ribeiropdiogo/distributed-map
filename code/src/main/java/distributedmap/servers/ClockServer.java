@@ -1,9 +1,8 @@
-package distributedmap.server;
+package distributedmap.servers;
 
-import distributedmap.comm.FutureSocketChannelReader;
-import distributedmap.comm.FutureSocketChannelWriter;
-import distributedmap.comm.Response;
-import distributedmap.comm.VectorMessage;
+import distributedmap.communication.FutureSocketChannelReader;
+import distributedmap.communication.FutureSocketChannelWriter;
+import distributedmap.communication.VectorMessage;
 import spullara.nio.channels.FutureServerSocketChannel;
 
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static distributedmap.Constants.*;
+import static distributedmap.utils.Constants.*;
 import static java.util.concurrent.Executors.defaultThreadFactory;
 
 public class ClockServer {

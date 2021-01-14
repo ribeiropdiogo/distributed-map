@@ -1,4 +1,4 @@
-package distributedmap.server;
+package distributedmap.servers;
 
 import spullara.nio.channels.FutureSocketChannel;
 

@@ -1,8 +1,8 @@
-package distributedmap.server;
+package distributedmap.servers;
 
-import static distributedmap.Constants.*;
-import distributedmap.comm.*;
-import distributedmap.util.LockableHashMap;
+import static distributedmap.utils.Constants.*;
+import distributedmap.communication.*;
+import distributedmap.utils.LockableHashMap;
 import spullara.nio.channels.FutureServerSocketChannel;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -38,6 +38,7 @@ public class Server {
         FutureSocketChannelWriter.write(c.socket, res)
                 .thenAccept(_void_ -> {
                     requests_served++;
+                    System.out.println("> Request served");
                     serveRec(c);
                 });
     }
@@ -63,6 +64,7 @@ public class Server {
         FutureSocketChannelWriter.write(c.socket, res)
                 .thenAccept(_void_ -> {
                     requests_served++;
+                    System.out.println("> Request served");
                     serveRec(c);
                 });
     }
@@ -73,9 +75,11 @@ public class Server {
         FutureSocketChannelReader.read(c.socket, buf).thenAccept(msg -> {
             Request req = (Request) msg;
 
-            //System.out.println("> " + Arrays.toString(req.vectorClock));
+            System.out.println("> " + Arrays.toString(req.vectorClock));
             // Wait for turn
-            while(req.vectorClock[options.number] > (requests_served+1)){}
+            int i = 0;
+            while(req.vectorClock[options.number] > (requests_served+1)){i = 1;}
+            if (i==1) System.out.println("Desbloqueei");
 
             if (req.method == Request.Method.PUT) {
                 putRec(c, req.map);
@@ -119,7 +123,7 @@ public class Server {
         requests_served = 0;
 
         AsynchronousChannelGroup acg =
-                AsynchronousChannelGroup.withFixedThreadPool(1, defaultThreadFactory());
+                AsynchronousChannelGroup.withFixedThreadPool(10, defaultThreadFactory());
         fssc = FutureServerSocketChannel.open(acg);
         fssc.bind(new InetSocketAddress(port));
 

@@ -1,10 +1,10 @@
-package distributedmap.impl;
+package distributedmap.API;
 
-import static distributedmap.Constants.*;
+import static distributedmap.utils.Constants.*;
 
-import distributedmap.comm.*;
-import distributedmap.util.Counter;
-import distributedmap.util.LockableHashMap;
+import distributedmap.communication.*;
+import distributedmap.utils.Counter;
+import distributedmap.utils.LockableHashMap;
 import spullara.nio.channels.FutureSocketChannel;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -96,9 +96,9 @@ public class DistributedMap {
         }
 
         /* Obtenção do relógio lógico vetorial */
-        System.out.println("> " + Arrays.toString(vectorClock));
+        //System.out.println("> " + Arrays.toString(vectorClock));
         vectorClock = getVectorClock(vectorClock).get();
-        System.out.println("> " + Arrays.toString(vectorClock));
+        //System.out.println("> " + Arrays.toString(vectorClock));
 
         /* Envio */
         final int numRequests = _numRequests;
@@ -149,9 +149,9 @@ public class DistributedMap {
         }
 
         /* Obtenção do relógio lógico vetorial */
-        System.out.println("> " + Arrays.toString(vectorClock));
+        //System.out.println("> " + Arrays.toString(vectorClock));
         vectorClock = getVectorClock(vectorClock).get();
-        System.out.println("> " + Arrays.toString(vectorClock));
+        //System.out.println("> " + Arrays.toString(vectorClock));
 
         /* Envio */
         final int numRequests = _numRequests;

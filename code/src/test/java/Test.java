@@ -1,4 +1,4 @@
-import distributedmap.impl.DistributedMap;
+import distributedmap.API.DistributedMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

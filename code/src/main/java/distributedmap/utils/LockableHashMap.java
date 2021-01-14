@@ -1,4 +1,4 @@
-package distributedmap.util;
+package distributedmap.utils;
 
 import java.util.Map;
 import java.util.HashMap;
