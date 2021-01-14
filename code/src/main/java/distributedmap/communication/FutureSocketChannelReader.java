@@ -1,4 +1,4 @@
-package distributedmap.comm;
+package distributedmap.communication;
 
 import spullara.nio.channels.FutureSocketChannel;
 import java.io.ByteArrayInputStream;

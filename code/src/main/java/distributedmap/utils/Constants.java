@@ -1,4 +1,4 @@
-package distributedmap;
+package distributedmap.utils;
 
 
 public final class Constants {

@@ -1,4 +1,4 @@
-package distributedmap.util;
+package distributedmap.utils;
 
 
 public class Counter {

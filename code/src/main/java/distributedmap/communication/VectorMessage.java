@@ -1,10 +1,6 @@
-package distributedmap.comm;
+package distributedmap.communication;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.Map;
-
-import static distributedmap.Constants.TOTAL_SERVERS;
 
 
 public class VectorMessage implements Message, Serializable {

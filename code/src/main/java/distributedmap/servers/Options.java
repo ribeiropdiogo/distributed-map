@@ -1,4 +1,4 @@
-package distributedmap.server;
+package distributedmap.servers;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;

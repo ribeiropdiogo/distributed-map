@@ -1,5 +1,5 @@
 import static java.lang.System.out;
-import distributedmap.impl.DistributedMap;
+import distributedmap.API.DistributedMap;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

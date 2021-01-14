@@ -1,10 +1,10 @@
-package distributedmap.comm;
+package distributedmap.communication;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-import static distributedmap.Constants.TOTAL_SERVERS;
+import static distributedmap.utils.Constants.TOTAL_SERVERS;
 
 
 public class Request implements Message, Serializable {

@@ -1,4 +1,4 @@
-package distributedmap.comm;
+package distributedmap.communication;
 
 import java.io.Serializable;
 import java.util.Map;
