@@ -19,12 +19,12 @@ import java.util.concurrent.TimeUnit;
 public class Server {
 
     private static FutureServerSocketChannel fssc;
-    private static LockableHashMap<Long, byte[]> map;
+    private static HashMap<Long, byte[]> map;
     private static LockableHashMap<Integer, Pair<FutureSocketChannel, Request>> queue;
-    private static SyncCounter requests_served;
+    private static SyncCounter clock;
 
 
-    /* Impede a instanciação */
+    // Impede a instanciação
     private Server() {}
 
     private static void serveQueueRec(int next) {
@@ -41,44 +41,41 @@ public class Server {
                     get(pair.fst, pair.snd.col);
                     break;
             }
-            serveQueueRec(requests_served.inc());
         }
     }
 
     private static void put(FutureSocketChannel socket, Map<Long, byte[]> nmap) {
         // Put the key/values in the map
-        map.lock();
         map.putAll(nmap);
-        map.unlock();
 
         // Send response
         Response res = new Response();
 
         FutureSocketChannelWriter.write(socket, res)
                 .thenAccept(_void_ -> {
-                    System.out.println("> Request served");
-                    serveQueueRec(requests_served.inc());
+                    int c = clock.inc();
+                    System.out.println("Request(clock=" + c + ") served");
+                    serveQueueRec(c + 1);
                 });
     }
 
     private static void get(FutureSocketChannel socket, Collection<Long> keys) {
         // Get the key/values in the map
         Map<Long, byte[]> rmap = new HashMap<>();
-        map.lock();
         for (Long key : keys) {
             byte[] value = map.get(key);
             if (value != null)
                 rmap.put(key, value);
         }
-        map.unlock();
 
         // Send response
         Response res = new Response(rmap);
 
         FutureSocketChannelWriter.write(socket, res)
                 .thenAccept(_void_ -> {
-                    System.out.println("> Request served");
-                    serveQueueRec(requests_served.inc());
+                    int c = clock.inc();
+                    System.out.println("Request(clock=" + c + ") served");
+                    serveQueueRec(c + 1);
                 });
     }
 
@@ -88,9 +85,9 @@ public class Server {
         FutureSocketChannelReader.read(socket, buf).thenAccept(msg -> {
             Request req = (Request) msg;
 
-            System.out.println("> Received request with clock=" + req.clock);
+            System.out.println("Received request(clock=" + req.clock + ")");
 
-            if (req.clock == requests_served.get() + 1) {
+            if (req.clock == clock.get() + 1) {
                 switch (req.method) {
                     case PUT:
                         put(socket, req.map);
@@ -107,7 +104,7 @@ public class Server {
             serveRec(socket);
 
         }).exceptionally(e -> {
-            System.out.println("> Client disconnected");
+            System.out.println("Client disconnected");
             socket.close();
             return null;
         });
@@ -115,7 +112,7 @@ public class Server {
 
     private static void acceptRec() {
         fssc.accept().thenAccept(socket -> {
-            System.out.println("> Connection accepted");
+            System.out.println("Connection accepted");
             serveRec(socket);
             acceptRec();
         });
@@ -125,24 +122,24 @@ public class Server {
         Options options = Options.parse(args);
         if (options == null) return;
 
-        System.out.println("> Server '" + options.number + "' started...");
+        System.out.println("Server '" + options.number + "' started...");
 
         final int port = SERVER_PORT_BASE + options.number;
 
-        map = new LockableHashMap<>();
+        map = new HashMap<>();
         queue = new LockableHashMap<>();
-        requests_served = new SyncCounter();
+        clock = new SyncCounter();
 
         AsynchronousChannelGroup acg =
-                AsynchronousChannelGroup.withFixedThreadPool(SERVER_N_THREADS, defaultThreadFactory());
+                AsynchronousChannelGroup.withFixedThreadPool(N_THREADS, defaultThreadFactory());
         fssc = FutureServerSocketChannel.open(acg);
         fssc.bind(new InetSocketAddress(port));
 
-        System.out.println("> Listening on port " + port + "...");
+        System.out.println("Listening on port " + port + "...");
 
         acceptRec();
 
-        /* Await */
+        // Await
         boolean awaitRet = false;
         do {
             try {

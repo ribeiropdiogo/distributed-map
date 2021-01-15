@@ -7,11 +7,12 @@ public final class Constants {
 
     public static final int SERVER_PORT_BASE = 12300;
     public static final int TOTAL_SERVERS = 4;
-    public static final int SERVER_N_THREADS = 10;
+
+    public static final int N_THREADS = 10;
 
     public static final int BUF_SIZE = 1000;
 
 
-    /* Impede a instanciação */
+    // Impede a instanciação
     private Constants() {}
 }

@@ -41,7 +41,8 @@ public class DistributedMap {
         );
 
         /* Espera que todas as ligações sejam feitas */
-        for (int i = 0; i < TOTAL_SERVERS;) {
+        int n = TOTAL_SERVERS + 1;
+        for (int i = 0; i < n;) {
             try {
                 wait.get(i).get();
                 ++i;
@@ -59,7 +60,7 @@ public class DistributedMap {
         return (int) (key % TOTAL_SERVERS);
     }
 
-    private int[] initRequestVector(){
+    private int[] initRequestVector() {
         int[] r = new int[TOTAL_SERVERS];
         for (int i = 0; i < TOTAL_SERVERS; ++i)
             r[i] = 0;
@@ -82,7 +83,7 @@ public class DistributedMap {
         return acceptor;
     }
 
-    public CompletableFuture<Void> put(Map<Long, byte[]> pairs) throws ExecutionException, InterruptedException {
+    public CompletableFuture<Void> put(Map<Long, byte[]> pairs) {
         final CompletableFuture<Void> acceptor = new CompletableFuture<>();
         int[] requestVector = initRequestVector();
 
@@ -102,7 +103,13 @@ public class DistributedMap {
         }
 
         /* Obtenção dos relógios lógicos */
-        int[] clockVector = getClockVector(requestVector).get();
+        int[] clockVector;
+        try {
+            clockVector = getClockVector(requestVector).get();
+        } catch (InterruptedException | ExecutionException e) {
+            acceptor.completeExceptionally(e);
+            return acceptor;
+        }
 
         /* Envio */
         final int numRequests = _numRequests;
@@ -127,7 +134,7 @@ public class DistributedMap {
         return acceptor;
     }
 
-    public CompletableFuture<Map<Long, byte[]>> get(Collection<Long> keys) throws ExecutionException, InterruptedException {
+    public CompletableFuture<Map<Long, byte[]>> get(Collection<Long> keys) {
         final CompletableFuture<Map<Long, byte[]>> acceptor = new CompletableFuture<>();
         final LockableHashMap<Long, byte[]> r = new LockableHashMap<>();
         int[] requestVector = initRequestVector();
@@ -147,7 +154,13 @@ public class DistributedMap {
         }
 
         /* Obtenção dos relógios lógicos */
-        int[] clockVector = getClockVector(requestVector).get();
+        int[] clockVector;
+        try {
+            clockVector = getClockVector(requestVector).get();
+        } catch (InterruptedException | ExecutionException e) {
+            acceptor.completeExceptionally(e);
+            return acceptor;
+        }
 
         /* Envio */
         final int numRequests = _numRequests;
