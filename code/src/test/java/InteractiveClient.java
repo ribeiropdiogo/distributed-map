@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.locks.ReentrantLock;
 
 
-/*
+/* ====== COMO USAR ======
 === PUT:
 put\n
 long0 value0\n

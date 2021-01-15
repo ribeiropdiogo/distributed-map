@@ -1,5 +1,7 @@
 import distributedmap.api.DistributedMap;
+import distributedmap.utils.SyncCounter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -9,65 +11,70 @@ import java.util.concurrent.ExecutionException;
 
 public class ConcurrentTest {
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
 
-        int total = 25;
-        Thread[] threads = new Thread[total];
+        final int N_THREADS = 25;
+        final SyncCounter counter = new SyncCounter();
+        Thread[] threads = new Thread[N_THREADS];
 
-        for (int i = 0; i < total; i++){
-            int id = i;
-            threads[i] = new Thread(new Runnable() {
-                public void run() {
-                    System.out.println("> Starting thread " + id);
-                    try {
-                        DistributedMap dm = new DistributedMap();
-                        Map<Long, byte[]> values = new HashMap<>();
+        for (int i = 0; i < N_THREADS; ++i) {
+            final int id = i;
+            threads[i] = new Thread(() -> {
+                System.out.println("> Starting thread " + id);
 
-                        byte[] array = ("thread"+id).getBytes();
-                        values.put(Integer.toUnsignedLong(0),array);
-                        values.put(Integer.toUnsignedLong(1),array);
-                        /*values.put(Integer.toUnsignedLong(2),array);
-                        values.put(Integer.toUnsignedLong(3),array);
-                        values.put(Integer.toUnsignedLong(4),array);
-                        values.put(Integer.toUnsignedLong(5),array);*/
-
-                        Collection<Long> l = new ArrayList<>();
-                        l.add(Integer.toUnsignedLong(0));
-                        l.add(Integer.toUnsignedLong(1));
-                        /*l.add(Integer.toUnsignedLong(2));
-                        l.add(Integer.toUnsignedLong(3));
-                        l.add(Integer.toUnsignedLong(4));
-                        l.add(Integer.toUnsignedLong(5));*/
-
-                        dm.put(values).thenAccept(v -> {
-                            System.out.println("> Thread "+id+" finished put...");
-                            try {
-                                dm.get(l).thenAccept(map -> {
-                                    System.out.println("> Thread "+id+" reads:");
-                                    for (Map.Entry<Long, byte[]> entry : map.entrySet()) {
-                                        System.out.println("> T"+id+": " + entry.getKey().toString() + " = " + new String(entry.getValue()));
-                                    }
-                                    dm.close();
-                                    System.out.println("> Thread "+id+" finished get's...");
-                                });
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                DistributedMap dm;
+                try {
+                    dm = new DistributedMap();
+                } catch (IOException | ExecutionException e) {
+                    e.printStackTrace();
+                    return;
                 }
+                Map<Long, byte[]> pairs = new HashMap<>();
+
+                byte[] array = ("thread" + id).getBytes();
+                pairs.put(0L, array);
+                pairs.put(1L, array);
+                pairs.put(2L, array);
+                pairs.put(3L, array);
+
+                Collection<Long> keys = new ArrayList<>();
+                keys.add(0L);
+                keys.add(1L);
+                keys.add(2L);
+                keys.add(3L);
+
+                dm.put(pairs).thenAccept(v -> {
+                    System.out.println("> Thread " + id + " finished put");
+
+                    dm.get(keys).thenAccept(map -> {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("> Thread ").append(id).append(" finished get:");
+                        for (Map.Entry<Long, byte[]> entry : map.entrySet())
+                            sb.append("\n    T").append(id).append(": ").append(entry.getKey()).append(" = ").append(new String(entry.getValue()));
+                        System.out.println(sb.toString());
+
+                        dm.close();
+
+                        if (counter.inc() >= N_THREADS)
+                            System.out.println("> Finished");
+                    });
+                });
             });
         }
 
-        for (int i = 0; i < total; i++){
+        for (int i = 0; i < N_THREADS; i++){
             threads[i].start();
-            Thread.sleep(10);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {
+            }
         }
 
         while (true) {
-            try { Thread.sleep(Long.MAX_VALUE); } catch (Exception ignored) {}
+            try {
+                Thread.sleep(Long.MAX_VALUE);
+            } catch (Exception ignored) {
+            }
         }
     }
 }
