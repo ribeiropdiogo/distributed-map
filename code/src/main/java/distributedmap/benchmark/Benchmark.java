@@ -2,11 +2,9 @@ package distributedmap.benchmark;
 
 import distributedmap.api.DistributedMap;
 import distributedmap.utils.SyncCounter;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 
 public class Benchmark {
