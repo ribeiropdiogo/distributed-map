@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import static java.util.concurrent.Executors.defaultThreadFactory;
@@ -29,7 +28,7 @@ public class ClockServer {
     private static synchronized void getClocks(VectorMessage vm) {
         // c = 0 -> server at position c isn't used by the request
         // c = 1 -> server at position c is used by the request
-        for (int i = 0; i < TOTAL_SERVERS; ++i) {
+        for (int i = 0; i < N_SERVERS; ++i) {
             vm.vector[i] =
                     vm.vector[i] == 0 ? clocks[i] : ++clocks[i];
         }
@@ -67,8 +66,8 @@ public class ClockServer {
     public static void main(String[] args) throws IOException {
         System.out.println("Clock Server started...");
 
-        clocks = new int[TOTAL_SERVERS];
-        for (int i = 0; i < TOTAL_SERVERS; i++)
+        clocks = new int[N_SERVERS];
+        for (int i = 0; i < N_SERVERS; i++)
             clocks[i] = 0;
 
         AsynchronousChannelGroup acg =

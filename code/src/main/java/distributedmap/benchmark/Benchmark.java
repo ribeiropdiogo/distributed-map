@@ -1,14 +1,15 @@
 package distributedmap.benchmark;
 
 import distributedmap.api.DistributedMap;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 
 public class Benchmark {
+
+    // Impede a instanciação
+    private Benchmark() {}
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
 
@@ -18,49 +19,50 @@ public class Benchmark {
         // Denining variables
         DistributedMap dm = new DistributedMap();
         int operations = 0;
-        long start = System.currentTimeMillis();
-        float elapsed = 0, throughput, artt, trtt = 0;
+        long elapsed_ms = 0, trt_ms = 0;
+        final long execution_time_ms = options.execution_time * 1000;
+        final long start_ms = System.currentTimeMillis();
 
         // Execute Load
-        while (elapsed < options.execution_time){
-            float begin = 0;
-
+        while (elapsed_ms < execution_time_ms) {
             Random random = new Random();
-            int option = random.nextInt(2) + 1;
-            switch (option){
-                case 1:
-                    int key = random.nextInt(10000) + 1;
-                    byte[] array = "This benchmark is really fancy...".getBytes();
-                    Map<Long, byte[]> values = new HashMap<>();
-                    values.put(Integer.toUnsignedLong(key),array);
-                    dm.put(values);
-                    break;
-                case 2:
-                    int get_key = random.nextInt(10000) + 1;
-                    Collection<Long> l = new ArrayList<>();
-                    l.add(Integer.toUnsignedLong(get_key));
-                    dm.get(l);
-                    break;
-            }
+            long send_ms, recv_ms;
 
-            long current = System.currentTimeMillis();
-            trtt += TimeUnit.MILLISECONDS.toMinutes(current - start);
-            elapsed = TimeUnit.MILLISECONDS.toMinutes(current - start);
-            operations++;
-            Thread.sleep(10);
+            boolean option = random.nextBoolean();
+            long key = random.nextLong();
+            if (option) {
+                byte[] array = "This benchmark is really fancy...".getBytes();
+                Map<Long, byte[]> values = new HashMap<>();
+                values.put(key, array);
+                send_ms = System.currentTimeMillis();
+                dm.put(values).get();
+            } else {
+                Collection<Long> l = new ArrayList<>();
+                l.add(key);
+                send_ms = System.currentTimeMillis();
+                dm.get(l).get();
+            }
+            recv_ms = System.currentTimeMillis();
+
+            long current_ms = System.currentTimeMillis();
+            elapsed_ms = current_ms - start_ms;
+            trt_ms += recv_ms - send_ms;
+            ++operations;
         }
 
         if (operations > 0) {
             // Print Results
-            System.out.println("> Benchmark results after "+options.execution_time+" minutes : ");
-            throughput = operations/elapsed;
-            System.out.println("    Throughput: " + throughput + " operations/second");
-            artt = trtt/operations;
-            System.out.println("    Average Response Time: " + artt + " seconds");
+            double elapsed_s = elapsed_ms / 1000.0;
+            double trt_s = trt_ms / 1000.0;
+
+            System.out.println("> Benchmark results after " + elapsed_s + " seconds :");
+            System.out.println("    Operations: " + operations);
+            double throughput = operations/elapsed_s;
+            System.out.printf("    Throughput: %.2f operations/second\n", throughput);
+            double art = trt_s/operations;
+            System.out.printf("    Average Response Time: %f seconds\n", art);
         } else {
             System.out.println("> Error running benchmark");
         }
-
-
     }
 }

@@ -4,8 +4,6 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
-import static distributedmap.utils.Constants.TOTAL_SERVERS;
-
 
 public class Request implements Message, Serializable {
 

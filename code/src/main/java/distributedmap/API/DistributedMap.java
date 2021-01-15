@@ -21,11 +21,11 @@ public class DistributedMap {
 
 
     public DistributedMap() throws IOException, ExecutionException {
-        sockets = new FutureSocketChannel[TOTAL_SERVERS];
+        sockets = new FutureSocketChannel[N_SERVERS];
         List<CompletableFuture<Void>> wait = new ArrayList<>();
 
         /* É feita a ligação com cada um dos servidores */
-        for (int i = 0; i < TOTAL_SERVERS; ++i) {
+        for (int i = 0; i < N_SERVERS; ++i) {
             sockets[i] = new FutureSocketChannel();
             wait.add(
                     sockets[i].connect(
@@ -41,7 +41,7 @@ public class DistributedMap {
         );
 
         /* Espera que todas as ligações sejam feitas */
-        int n = TOTAL_SERVERS + 1;
+        int n = N_SERVERS + 1;
         for (int i = 0; i < n;) {
             try {
                 wait.get(i).get();
@@ -57,12 +57,13 @@ public class DistributedMap {
     }
 
     private int hash(Long key) {
-        return (int) (key % TOTAL_SERVERS);
+        key = key < 0L ? -key : key;
+        return (int) (key % N_SERVERS);
     }
 
     private int[] initRequestVector() {
-        int[] r = new int[TOTAL_SERVERS];
-        for (int i = 0; i < TOTAL_SERVERS; ++i)
+        int[] r = new int[N_SERVERS];
+        for (int i = 0; i < N_SERVERS; ++i)
             r[i] = 0;
         return r;
     }
@@ -89,7 +90,7 @@ public class DistributedMap {
 
         /* Separação dos pares pelos servidores correspondentes */
         List<Map<Long, byte[]>> mapList = new ArrayList<>();
-        for (int i = 0; i < TOTAL_SERVERS; ++i) mapList.add(null);
+        for (int i = 0; i < N_SERVERS; ++i) mapList.add(null);
         int _numRequests = 0;  // número de pedidos a serem feitos (= número de servidores a serem contactados)
         for (Map.Entry<Long, byte[]> entry : pairs.entrySet()) {
             Long key = entry.getKey();
@@ -114,7 +115,7 @@ public class DistributedMap {
         /* Envio */
         final int numRequests = _numRequests;
         final SyncCounter counter = new SyncCounter();
-        for (int i = 0; i < TOTAL_SERVERS; ++i) {
+        for (int i = 0; i < N_SERVERS; ++i) {
             Map<Long, byte[]> map = mapList.get(i);
             if (map != null) {
                 Request req = new Request(map, clockVector[i]);
@@ -141,7 +142,7 @@ public class DistributedMap {
 
         /* Separação das keys pelos servidores correspondentes */
         List<Collection<Long>> colList = new ArrayList<>();
-        for (int i = 0; i < TOTAL_SERVERS; ++i) colList.add(null);
+        for (int i = 0; i < N_SERVERS; ++i) colList.add(null);
         int _numRequests = 0;  // número de pedidos a serem feitos (= número de servidores a serem contactados)
         for (Long key : keys) {
             int serverNum = hash(key);
@@ -165,7 +166,7 @@ public class DistributedMap {
         /* Envio */
         final int numRequests = _numRequests;
         final SyncCounter counter = new SyncCounter();
-        for (int i = 0; i < TOTAL_SERVERS; ++i) {
+        for (int i = 0; i < N_SERVERS; ++i) {
             Collection<Long> col = colList.get(i);
             if (col != null) {
                 Request req = new Request(col, clockVector[i]);

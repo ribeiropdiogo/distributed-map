@@ -9,8 +9,8 @@ public class Options {
     @Parameter(names = {"-h", "-?", "--help"}, help = true, description = "display usage information")
     public boolean help = false;
 
-    @Parameter(names = {"-t", "--time"}, required = false, description = "execution time in minutes")
-    public long execution_time = 2;
+    @Parameter(names = {"-t", "--time"}, description = "execution time in seconds (> 0)")
+    public long execution_time = 10L;
 
 
     public static Options parse(String[] args) {
@@ -31,7 +31,7 @@ public class Options {
             return null;
         }
 
-        if (options.help || options.execution_time < 0) {
+        if (options.help || options.execution_time <= 0) {
             parser.usage();
             return null;
         }
