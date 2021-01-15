@@ -58,12 +58,12 @@ public class DistributedMap {
         clock_socket.close();
     }
 
-    private int hash(Long key) {
+    private static int hash(Long key) {
         key = key < 0L ? -key : key;
         return (int) (key % N_SERVERS);
     }
 
-    private int[] initRequestVector() {
+    private static int[] initRequestVector() {
         int[] r = new int[N_SERVERS];
         for (int i = 0; i < N_SERVERS; ++i)
             r[i] = 0;
