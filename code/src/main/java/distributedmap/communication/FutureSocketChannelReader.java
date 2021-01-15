@@ -12,6 +12,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class FutureSocketChannelReader {
 
+    // Impede a instanciação
+    private FutureSocketChannelReader() {
+    }
+
     public static CompletableFuture<Message> read(FutureSocketChannel socket, ByteBuffer buf) {
         CompletableFuture<Message> acceptor = new CompletableFuture<>();
 

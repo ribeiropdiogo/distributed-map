@@ -11,6 +11,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class FutureSocketChannelWriter {
 
+    // Impede a instanciação
+    private FutureSocketChannelWriter() {
+    }
+
     public static CompletableFuture<Void> write(FutureSocketChannel socket, Message msg) {
         CompletableFuture<Void> acceptor = new CompletableFuture<>();
 
