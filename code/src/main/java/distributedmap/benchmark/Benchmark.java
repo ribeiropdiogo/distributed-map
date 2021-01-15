@@ -24,6 +24,10 @@ public class Benchmark {
         final SyncCounter terminatedThreads = new SyncCounter();
         final int[] operations = { 0 };
         final long[] trt_ms = { 0 };
+
+        System.out.println("> Starting benchmark with parameters: " + options.concurrent_users + " users, " +
+                options.execution_time + " seconds");
+
         final long execution_time_ms = options.execution_time * 1000;
 
         for (int i = 0; i < options.concurrent_users; ++i) {
@@ -85,7 +89,7 @@ public class Benchmark {
             double throughput = operations[0] / ((double) options.execution_time);
             double art = trt_s / operations[0];
 
-            System.out.println("> Benchmark results after " + options.execution_time + " seconds :");
+            System.out.println("> Benchmark results:");
             System.out.println("    Operations: " + operations[0]);
             System.out.printf("    Throughput: %.2f operations/second\n", throughput);
             System.out.printf("    Average Response Time: %f seconds\n", art);
