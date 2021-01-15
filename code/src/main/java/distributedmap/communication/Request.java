@@ -12,23 +12,23 @@ public class Request implements Message, Serializable {
     public final Method method;
     public final Map<Long, byte[]> map;
     public final Collection<Long> col;
-    public int[] vectorClock;
+    public final int clock;
 
 
     public static enum Method { PUT, GET }
 
 
-    public Request(Map<Long, byte[]> map) {
+    public Request(Map<Long, byte[]> map, int clock) {
         this.method = Method.PUT;
         this.map = map;
         this.col = null;
-        this.vectorClock = new int[TOTAL_SERVERS];
+        this.clock = clock;
     }
 
-    public Request(Collection<Long> col) {
+    public Request(Collection<Long> col, int clock) {
         this.method = Method.GET;
         this.map = null;
         this.col = col;
-        this.vectorClock = new int[TOTAL_SERVERS];
+        this.clock = clock;
     }
 }

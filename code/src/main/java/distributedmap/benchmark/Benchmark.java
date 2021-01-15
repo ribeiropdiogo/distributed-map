@@ -1,6 +1,6 @@
 package distributedmap.benchmark;
 
-import distributedmap.API.DistributedMap;
+import distributedmap.api.DistributedMap;
 
 import java.io.IOException;
 import java.util.*;

@@ -6,17 +6,14 @@ import java.util.Map;
 
 public class Response implements Message, Serializable {
 
-    public final boolean success;
     public final Map<Long, byte[]> map;
 
 
-    public Response(boolean success) {
-        this.success = success;
+    public Response() {
         this.map = null;
     }
 
-    public Response(boolean success, Map<Long, byte[]> map) {
-        this.success = success;
+    public Response(Map<Long, byte[]> map) {
         this.map = map;
     }
 }

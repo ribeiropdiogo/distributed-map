@@ -1,16 +1,16 @@
 package distributedmap.utils;
 
 
-public class Counter {
+public class SyncCounter {
 
     private int count;
 
 
-    public Counter() {
+    public SyncCounter() {
         count = 0;
     }
 
-    public Counter(int initialValue) {
+    public SyncCounter(int initialValue) {
         count = initialValue;
     }
 

@@ -1,9 +1,11 @@
 package distributedmap.servers;
 
+import static distributedmap.utils.Constants.*;
 import distributedmap.communication.FutureSocketChannelReader;
 import distributedmap.communication.FutureSocketChannelWriter;
 import distributedmap.communication.VectorMessage;
 import spullara.nio.channels.FutureServerSocketChannel;
+import spullara.nio.channels.FutureSocketChannel;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,65 +14,44 @@ import java.nio.channels.AsynchronousChannelGroup;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.ReentrantLock;
-
-import static distributedmap.utils.Constants.*;
 import static java.util.concurrent.Executors.defaultThreadFactory;
+
 
 public class ClockServer {
 
     private static FutureServerSocketChannel fssc;
-    private static ArrayList<Client> clients;
-    private static ReentrantLock vector_lock;
+    private static ArrayList<FutureSocketChannel> clients;
     private static int[] clocks;
 
 
     /* Impede a instanciação */
     private ClockServer() {}
 
-    private static void initVectorClock(){
-        clocks = new int[TOTAL_SERVERS];
-        for (int i = 0; i < TOTAL_SERVERS; i++)
-            clocks[i] = 0;
-    }
-
-    private static int incrementClock(int p){
-        clocks[p]++;
-        return clocks[p];
-    }
-
-    private static int getClock(int p){
-        return clocks[p];
-    }
-
-    private static void getVector(VectorMessage vr){
-        vector_lock.lock();
+    private static void getClocks(VectorMessage vm) {
         // c = 0 -> server at position c isn't used by the request
         // c = 1 -> server at position c is used by the request
-        for (int p = 0; p < TOTAL_SERVERS; p++){
-            if (vr.vectorClock[p] == 1)
-                vr.vectorClock[p] = incrementClock(p);
-            else if (vr.vectorClock[p] == 0)
-                vr.vectorClock[p] = getClock(p);
+        for (int i = 0; i < TOTAL_SERVERS; ++i) {
+            vm.vector[i] =
+                    vm.vector[i] == 0 ? clocks[i] : ++clocks[i];
         }
-        vector_lock.unlock();
     }
 
-    private static void serveRec(Client c) {
+    private static void serveRec(FutureSocketChannel socket) {
         ByteBuffer buf = ByteBuffer.allocate(BUF_SIZE);
 
-        FutureSocketChannelReader.read(c.socket, buf).thenAccept(msg -> {
-            VectorMessage vr = (VectorMessage) msg;
-            getVector(vr);
-            System.out.println("> " + Arrays.toString(vr.vectorClock));
+        FutureSocketChannelReader.read(socket, buf).thenAccept(msg -> {
+            VectorMessage vm = (VectorMessage) msg;
+
+            getClocks(vm);
+            System.out.println("> " + Arrays.toString(vm.vector));
+
             // Send response
-            FutureSocketChannelWriter.write(c.socket, vr)
-                    .thenAccept(_void_ -> {
-                        serveRec(c);
-                    });
+            FutureSocketChannelWriter.write(socket, vm)
+                    .thenAccept(_void_ -> serveRec(socket));
+
         }).exceptionally(e -> {
-            clients.remove(c);
-            c.socket.close();
+            clients.remove(socket);
+            socket.close();
             System.out.println("> Client disconnected (" + clients.size() + " clients connected)");
             return null;
         });
@@ -78,30 +59,27 @@ public class ClockServer {
 
     private static void acceptRec() {
         fssc.accept().thenAccept(socket -> {
-            Client c = new Client(socket);
-            clients.add(c);
+            clients.add(socket);
             System.out.println("> Connection accepted (" + clients.size() + " clients connected)");
-            serveRec(c);
+            serveRec(socket);
             acceptRec();
         });
     }
 
     public static void main(String[] args) throws IOException {
-
         System.out.println("> Clock Server started...");
 
-        final int port = CLOCK_SERVER_PORT;
-
         clients = new ArrayList<>();
-        vector_lock = new ReentrantLock();
-        initVectorClock();
+        clocks = new int[TOTAL_SERVERS];
+        for (int i = 0; i < TOTAL_SERVERS; i++)
+            clocks[i] = 0;
 
         AsynchronousChannelGroup acg =
                 AsynchronousChannelGroup.withFixedThreadPool(1, defaultThreadFactory());
         fssc = FutureServerSocketChannel.open(acg);
-        fssc.bind(new InetSocketAddress(port));
+        fssc.bind(new InetSocketAddress(CLOCK_SERVER_PORT));
 
-        System.out.println("> Listening on port " + port + "...");
+        System.out.println("> Listening on port " + CLOCK_SERVER_PORT + "...");
 
         acceptRec();
 

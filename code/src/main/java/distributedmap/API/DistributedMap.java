@@ -1,9 +1,9 @@
-package distributedmap.API;
+package distributedmap.api;
 
 import static distributedmap.utils.Constants.*;
 
 import distributedmap.communication.*;
-import distributedmap.utils.Counter;
+import distributedmap.utils.SyncCounter;
 import distributedmap.utils.LockableHashMap;
 import spullara.nio.channels.FutureSocketChannel;
 import java.io.IOException;
@@ -17,12 +17,11 @@ import java.util.concurrent.ExecutionException;
 public class DistributedMap {
 
     private final FutureSocketChannel[] sockets;
-    private final FutureSocketChannel clock_server_socket;
+    private final FutureSocketChannel clock_socket;
 
 
     public DistributedMap() throws IOException, ExecutionException {
         sockets = new FutureSocketChannel[TOTAL_SERVERS];
-        clock_server_socket = new FutureSocketChannel();
         List<CompletableFuture<Void>> wait = new ArrayList<>();
 
         /* É feita a ligação com cada um dos servidores */
@@ -34,7 +33,12 @@ public class DistributedMap {
                     )
             );
         }
-        clock_server_socket.connect(new InetSocketAddress("localhost",CLOCK_SERVER_PORT));
+        clock_socket = new FutureSocketChannel();
+        wait.add(
+                clock_socket.connect(
+                        new InetSocketAddress("localhost", CLOCK_SERVER_PORT)
+                )
+        );
 
         /* Espera que todas as ligações sejam feitas */
         for (int i = 0; i < TOTAL_SERVERS;) {
@@ -48,37 +52,39 @@ public class DistributedMap {
     public void close() {
         for (FutureSocketChannel socket : sockets)
             socket.close();
-        clock_server_socket.close();
-    }
-
-    private int[] initVectorClock(){
-        int[] vectorClock = new int[TOTAL_SERVERS];
-        for (int p = 0; p < TOTAL_SERVERS; p++)
-            vectorClock[p] = 0;
-        return vectorClock;
+        clock_socket.close();
     }
 
     private int hash(Long key) {
         return (int) (key % TOTAL_SERVERS);
     }
 
-    private CompletableFuture<int []> getVectorClock(int[] v){
+    private int[] initRequestVector(){
+        int[] r = new int[TOTAL_SERVERS];
+        for (int i = 0; i < TOTAL_SERVERS; ++i)
+            r[i] = 0;
+        return r;
+    }
+
+    private CompletableFuture<int[]> getClockVector(int[] v) {
         final CompletableFuture<int[]> acceptor = new CompletableFuture<>();
-        VectorMessage vr = new VectorMessage(v);
-        FutureSocketChannelWriter.write(clock_server_socket, vr).thenAccept(_void_ -> {
+
+        VectorMessage request = new VectorMessage(v);
+
+        FutureSocketChannelWriter.write(clock_socket, request).thenAccept(_void_ -> {
             ByteBuffer buf = ByteBuffer.allocate(BUF_SIZE);
-            FutureSocketChannelReader.read(clock_server_socket, buf).thenAccept(msg -> {
-                VectorMessage vector = (VectorMessage) msg;
-                //vectorClock = vector.vectorClock;
-                acceptor.complete(vector.vectorClock);
+            FutureSocketChannelReader.read(clock_socket, buf).thenAccept(msg -> {
+                VectorMessage response = (VectorMessage) msg;
+                acceptor.complete(response.vector);
             });
         });
+
         return acceptor;
     }
 
     public CompletableFuture<Void> put(Map<Long, byte[]> pairs) throws ExecutionException, InterruptedException {
         final CompletableFuture<Void> acceptor = new CompletableFuture<>();
-        int[] vectorClock = initVectorClock();
+        int[] requestVector = initRequestVector();
 
         /* Separação dos pares pelos servidores correspondentes */
         List<Map<Long, byte[]>> mapList = new ArrayList<>();
@@ -87,37 +93,29 @@ public class DistributedMap {
         for (Map.Entry<Long, byte[]> entry : pairs.entrySet()) {
             Long key = entry.getKey();
             int serverNum = hash(key);
-            vectorClock[serverNum] = 1;
             if (mapList.get(serverNum) == null) {
+                requestVector[serverNum] = 1;
                 ++_numRequests;
                 mapList.set(serverNum, new HashMap<>());
             }
             mapList.get(serverNum).put(key, entry.getValue());
         }
 
-        /* Obtenção do relógio lógico vetorial */
-        //System.out.println("> " + Arrays.toString(vectorClock));
-        vectorClock = getVectorClock(vectorClock).get();
-        //System.out.println("> " + Arrays.toString(vectorClock));
+        /* Obtenção dos relógios lógicos */
+        int[] clockVector = getClockVector(requestVector).get();
 
         /* Envio */
         final int numRequests = _numRequests;
-        final Counter counter = new Counter();
+        final SyncCounter counter = new SyncCounter();
         for (int i = 0; i < TOTAL_SERVERS; ++i) {
             Map<Long, byte[]> map = mapList.get(i);
             if (map != null) {
-                Request req = new Request(map);
-                req.vectorClock = vectorClock;
+                Request req = new Request(map, clockVector[i]);
                 final FutureSocketChannel socket = sockets[i];
 
                 FutureSocketChannelWriter.write(socket, req).thenAccept(_void_ -> {
                     ByteBuffer buf = ByteBuffer.allocate(BUF_SIZE);
                     FutureSocketChannelReader.read(socket, buf).thenAccept(msg -> {
-                        Response res = (Response) msg;
-                        if (!res.success) {
-                            // TODO wat do I do with dis
-                            return;
-                        }
                         if (counter.inc() >= numRequests)
                             /* Recebeu todas as respostas */
                             acceptor.complete(null);
@@ -132,45 +130,38 @@ public class DistributedMap {
     public CompletableFuture<Map<Long, byte[]>> get(Collection<Long> keys) throws ExecutionException, InterruptedException {
         final CompletableFuture<Map<Long, byte[]>> acceptor = new CompletableFuture<>();
         final LockableHashMap<Long, byte[]> r = new LockableHashMap<>();
-        int[] vectorClock = initVectorClock();
+        int[] requestVector = initRequestVector();
 
         /* Separação das keys pelos servidores correspondentes */
-        List<Collection<Long>> mapList = new ArrayList<>();
-        for (int i = 0; i < TOTAL_SERVERS; ++i) mapList.add(null);
+        List<Collection<Long>> colList = new ArrayList<>();
+        for (int i = 0; i < TOTAL_SERVERS; ++i) colList.add(null);
         int _numRequests = 0;  // número de pedidos a serem feitos (= número de servidores a serem contactados)
         for (Long key : keys) {
             int serverNum = hash(key);
-            vectorClock[serverNum] = 1;
-            if (mapList.get(serverNum) == null) {
+            if (colList.get(serverNum) == null) {
+                requestVector[serverNum] = 1;
                 ++_numRequests;
-                mapList.set(serverNum, new ArrayList<>());
+                colList.set(serverNum, new ArrayList<>());
             }
-            mapList.get(serverNum).add(key);
+            colList.get(serverNum).add(key);
         }
 
-        /* Obtenção do relógio lógico vetorial */
-        //System.out.println("> " + Arrays.toString(vectorClock));
-        vectorClock = getVectorClock(vectorClock).get();
-        //System.out.println("> " + Arrays.toString(vectorClock));
+        /* Obtenção dos relógios lógicos */
+        int[] clockVector = getClockVector(requestVector).get();
 
         /* Envio */
         final int numRequests = _numRequests;
-        final Counter counter = new Counter();
+        final SyncCounter counter = new SyncCounter();
         for (int i = 0; i < TOTAL_SERVERS; ++i) {
-            Collection<Long> col = mapList.get(i);
+            Collection<Long> col = colList.get(i);
             if (col != null) {
-                Request req = new Request(col);
-                req.vectorClock = vectorClock;
+                Request req = new Request(col, clockVector[i]);
                 final FutureSocketChannel socket = sockets[i];
 
                 FutureSocketChannelWriter.write(socket, req).thenAccept(_void_ -> {
                     ByteBuffer buf = ByteBuffer.allocate(BUF_SIZE);
                     FutureSocketChannelReader.read(socket, buf).thenAccept(msg -> {
                         Response res = (Response) msg;
-                        if (!res.success || res.map == null) {
-                            // TODO wat do I do with dis
-                            return;
-                        }
                         r.lock();
                         r.putAll(res.map);
                         r.unlock();
