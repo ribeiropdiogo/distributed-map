@@ -1,6 +1,7 @@
 package distributedmap.communication;
 
 import spullara.nio.channels.FutureSocketChannel;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -21,12 +22,18 @@ public class FutureSocketChannelWriter {
             oos.writeObject(msg);
             oos.flush();
         } catch (IOException e) {
-            try { baos.close(); } catch (IOException ignored) {}
+            try {
+                baos.close();
+            } catch (IOException ignored) {
+            }
             acceptor.completeExceptionally(e);
             return acceptor;
         }
         byte[] bytes = baos.toByteArray();
-        try { oos.close(); } catch (IOException ignored) {}
+        try {
+            oos.close();
+        } catch (IOException ignored) {
+        }
         ByteBuffer buf = ByteBuffer
                 .allocate(4 + bytes.length)
                 .putInt(bytes.length)

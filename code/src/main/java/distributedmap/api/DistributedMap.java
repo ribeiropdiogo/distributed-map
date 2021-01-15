@@ -6,6 +6,7 @@ import distributedmap.communication.*;
 import distributedmap.utils.SyncCounter;
 import distributedmap.utils.LockableHashMap;
 import spullara.nio.channels.FutureSocketChannel;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -29,7 +30,7 @@ public class DistributedMap {
             sockets[i] = new FutureSocketChannel();
             wait.add(
                     sockets[i].connect(
-                            new InetSocketAddress("localhost",SERVER_PORT_BASE + i)
+                            new InetSocketAddress("localhost", SERVER_PORT_BASE + i)
                     )
             );
         }
@@ -42,11 +43,12 @@ public class DistributedMap {
 
         /* Espera que todas as ligações sejam feitas */
         int n = N_SERVERS + 1;
-        for (int i = 0; i < n;) {
+        for (int i = 0; i < n; ) {
             try {
                 wait.get(i).get();
                 ++i;
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 

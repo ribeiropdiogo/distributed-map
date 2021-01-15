@@ -1,17 +1,21 @@
 package distributedmap.servers;
 
 import static distributedmap.utils.Constants.*;
+
 import distributedmap.communication.*;
 import distributedmap.utils.Pair;
 import distributedmap.utils.SyncCounter;
 import distributedmap.utils.LockableHashMap;
 import spullara.nio.channels.FutureServerSocketChannel;
 import spullara.nio.channels.FutureSocketChannel;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
+
 import static java.util.concurrent.Executors.defaultThreadFactory;
+
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -25,7 +29,8 @@ public class Server {
 
 
     // Impede a instanciação
-    private Server() {}
+    private Server() {
+    }
 
     private static void serveQueueRec(int next) {
         queue.lock();
@@ -144,7 +149,8 @@ public class Server {
         do {
             try {
                 awaitRet = acg.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         } while (!awaitRet);
     }
 }

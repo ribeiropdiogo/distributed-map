@@ -1,6 +1,7 @@
 package distributedmap.servers;
 
 import static distributedmap.utils.Constants.*;
+
 import distributedmap.communication.FutureSocketChannelReader;
 import distributedmap.communication.FutureSocketChannelWriter;
 import distributedmap.communication.VectorMessage;
@@ -13,6 +14,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+
 import static java.util.concurrent.Executors.defaultThreadFactory;
 
 
@@ -23,7 +25,8 @@ public class ClockServer {
 
 
     // Impede a instanciação
-    private ClockServer() {}
+    private ClockServer() {
+    }
 
     private static synchronized void getClocks(VectorMessage vm) {
         // c = 0 -> server at position c isn't used by the request
@@ -84,7 +87,8 @@ public class ClockServer {
         do {
             try {
                 awaitRet = acg.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
-            } catch (InterruptedException ignored) {}
+            } catch (InterruptedException ignored) {
+            }
         } while (!awaitRet);
     }
 }

@@ -1,6 +1,7 @@
 package distributedmap.benchmark;
 
 import distributedmap.api.DistributedMap;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -9,7 +10,8 @@ import java.util.concurrent.ExecutionException;
 public class Benchmark {
 
     // Impede a instanciação
-    private Benchmark() {}
+    private Benchmark() {
+    }
 
     public static void main(String[] args) throws IOException, ExecutionException, InterruptedException {
 
@@ -57,9 +59,9 @@ public class Benchmark {
 
             System.out.println("> Benchmark results after " + elapsed_s + " seconds :");
             System.out.println("    Operations: " + operations);
-            double throughput = operations/elapsed_s;
+            double throughput = operations / elapsed_s;
             System.out.printf("    Throughput: %.2f operations/second\n", throughput);
-            double art = trt_s/operations;
+            double art = trt_s / operations;
             System.out.printf("    Average Response Time: %f seconds\n", art);
         } else {
             System.out.println("> Error running benchmark");

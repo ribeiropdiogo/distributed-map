@@ -1,6 +1,7 @@
 package distributedmap.communication;
 
 import spullara.nio.channels.FutureSocketChannel;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,8 +22,8 @@ public class FutureSocketChannelReader {
     }
 
     private static void firstRead(FutureSocketChannel socket,
-                                ByteBuffer buf,
-                                CompletableFuture<Message> acceptor) {
+                                  ByteBuffer buf,
+                                  CompletableFuture<Message> acceptor) {
         socket.read(buf).thenAccept(i -> {
             if (i < 0) {
                 acceptor.completeExceptionally(new SocketException("Socket closed"));
@@ -74,11 +75,17 @@ public class FutureSocketChannelReader {
             oi = new ObjectInputStream(bais);
             msg = (Message) oi.readObject();
         } catch (ClassNotFoundException | IOException e) {
-            try { bais.close(); } catch (IOException ignored) {}
+            try {
+                bais.close();
+            } catch (IOException ignored) {
+            }
             acceptor.completeExceptionally(e);
             return;
         }
-        try { oi.close(); } catch (IOException ignored) {}
+        try {
+            oi.close();
+        } catch (IOException ignored) {
+        }
 
         acceptor.complete(msg);
     }

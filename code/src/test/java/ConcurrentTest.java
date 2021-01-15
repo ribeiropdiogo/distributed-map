@@ -11,7 +11,7 @@ public class ConcurrentTest {
 
     public static void main(String[] args) throws Exception {
 
-        int total = 5;
+        int total = 25;
         Thread[] threads = new Thread[total];
 
         for (int i = 0; i < total; i++){
@@ -50,9 +50,7 @@ public class ConcurrentTest {
                                     dm.close();
                                     System.out.println("> Thread "+id+" finished get's...");
                                 });
-                            } catch (ExecutionException e) {
-                                e.printStackTrace();
-                            } catch (InterruptedException e) {
+                            } catch (Exception e) {
                                 e.printStackTrace();
                             }
                         });

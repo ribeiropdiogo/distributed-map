@@ -58,9 +58,7 @@ public class Test {
                     dm.close();
                     System.out.println("closed...");
                 });
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });

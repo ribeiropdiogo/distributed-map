@@ -13,7 +13,7 @@ public class Request implements Message, Serializable {
     public final int clock;
 
 
-    public static enum Method { PUT, GET }
+    public static enum Method {PUT, GET}
 
 
     public Request(Map<Long, byte[]> map, int clock) {
