@@ -18,8 +18,16 @@ public class SyncCounter {
         return ++count;
     }
 
+    public synchronized int inc(int value) {
+        return count += value;
+    }
+
     public synchronized int dec() {
         return --count;
+    }
+
+    public synchronized int dec(int value) {
+        return count -= value;
     }
 
     public synchronized int get() {
