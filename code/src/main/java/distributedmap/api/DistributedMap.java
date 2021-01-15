@@ -1,12 +1,10 @@
 package distributedmap.api;
 
 import static distributedmap.utils.Constants.*;
-
 import distributedmap.communication.*;
 import distributedmap.utils.SyncCounter;
 import distributedmap.utils.LockableHashMap;
 import spullara.nio.channels.FutureSocketChannel;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;

@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
 
+
 public class Options {
 
     @Parameter(names = {"-h", "-?", "--help"}, help = true, description = "display usage information")
@@ -12,7 +13,7 @@ public class Options {
     @Parameter(names = {"-t", "--time"}, description = "execution time in seconds (> 0)")
     public long execution_time = 10L;
 
-    @Parameter(names = {"-u", "--users"}, description = "umber of concurrent users (> 0)")
+    @Parameter(names = {"-u", "--users"}, description = "number of concurrent users (> 0)")
     public int concurrent_users = 10;
 
 

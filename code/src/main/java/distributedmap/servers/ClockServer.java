@@ -1,20 +1,17 @@
 package distributedmap.servers;
 
 import static distributedmap.utils.Constants.*;
-
 import distributedmap.communication.FutureSocketChannelReader;
 import distributedmap.communication.FutureSocketChannelWriter;
 import distributedmap.communication.VectorMessage;
 import spullara.nio.channels.FutureServerSocketChannel;
 import spullara.nio.channels.FutureSocketChannel;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousChannelGroup;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
-
 import static java.util.concurrent.Executors.defaultThreadFactory;
 
 

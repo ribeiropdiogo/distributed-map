@@ -1,7 +1,6 @@
 package distributedmap.communication;
 
 import spullara.nio.channels.FutureSocketChannel;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
