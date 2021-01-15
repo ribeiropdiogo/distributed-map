@@ -32,7 +32,7 @@ public class Server {
     private Server() {
     }
 
-    private static void serveQueueRec(int next) {
+    private static void serveQueue(int next) {
         queue.lock();
         Pair<FutureSocketChannel, Request> pair = queue.remove(next);
         queue.unlock();
@@ -60,7 +60,7 @@ public class Server {
                 .thenAccept(_void_ -> {
                     int c = clock.inc();
                     System.out.println("Request(clock=" + c + ") served");
-                    serveQueueRec(c + 1);
+                    serveQueue(c + 1);
                 });
     }
 
@@ -80,7 +80,7 @@ public class Server {
                 .thenAccept(_void_ -> {
                     int c = clock.inc();
                     System.out.println("Request(clock=" + c + ") served");
-                    serveQueueRec(c + 1);
+                    serveQueue(c + 1);
                 });
     }
 
