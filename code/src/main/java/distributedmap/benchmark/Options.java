@@ -11,7 +11,7 @@ public class Options {
     public boolean help = false;
 
     @Parameter(names = {"-t", "--time"}, description = "execution time in seconds (> 0)")
-    public long execution_time = 10L;
+    public long execution_time = 30L;
 
     @Parameter(names = {"-u", "--users"}, description = "number of concurrent users (> 0)")
     public int concurrent_users = 10;
